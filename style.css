@@ -522,6 +522,55 @@ a:focus-visible .hero-portrait {
   transform: rotate(45deg);
 }
 
+/* botão "View on GitHub" do card em destaque */
+.project-github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5625rem 1rem;
+  border-radius: 999px;
+  background: #111827;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  transition: background-color 300ms ease;
+}
+
+.project-github-arrow {
+  transition: transform 400ms var(--project-ease, ease);
+}
+
+.project-card:hover .project-github-link {
+  background: #000;
+}
+
+.project-card:hover .project-github-arrow {
+  transform: translate(2px, -2px);
+}
+
+/* o link cobre o card inteiro, então clicar em qualquer parte abre o projeto */
+.project-stretched-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: 1.5rem;
+}
+
+.project-stretched-link:focus-visible {
+  outline: none;
+}
+
+.project-stretched-link:focus-visible::after {
+  outline: 2px solid #111827;
+  outline-offset: 3px;
+}
+
+.project-card:has(.project-stretched-link:focus-visible) .project-cta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .project-tags {
   display: flex;
   flex-wrap: wrap;
