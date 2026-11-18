@@ -91,8 +91,7 @@ body {
   transform-origin: center bottom;
 }
 
-a:hover .hero-portrait,
-a:focus-visible .hero-portrait {
+.hero-portrait:hover {
   transform: scale(1.02);
 }
 
