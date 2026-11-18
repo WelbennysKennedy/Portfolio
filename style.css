@@ -84,6 +84,18 @@ body {
     Helvetica, Arial;
 }
 
+/* A imagem ja vem recortada e em preto e branco (images/personagem-sem-fundo.png) */
+.hero-portrait {
+  filter: drop-shadow(0 24px 32px rgba(0, 0, 0, 0.18));
+  transition: transform 400ms ease;
+  transform-origin: center bottom;
+}
+
+a:hover .hero-portrait,
+a:focus-visible .hero-portrait {
+  transform: scale(1.02);
+}
+
 /* ==========================================================================
    Company Logo Marquee
    --------------------------------------------------------------------------
@@ -122,36 +134,155 @@ body {
 .company-logo-track {
   display: flex;
   width: max-content;
-  gap: 4rem;
-  animation: company-logo-scroll 18s linear infinite;
+  gap: 2rem;
+  padding: 0.75rem 0;
+  animation: company-logo-scroll 28s linear infinite;
 }
 
+/* pausa a faixa enquanto o mouse estiver sobre ela */
+.company-logo-marquee:hover .company-logo-track {
+  animation-play-state: paused;
+}
+
+/* cartão de cada logo */
 .company-logo-item {
+  --logo-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
   display: flex;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  width: 10rem;
-  height: 3rem;
+  width: 12.5rem;
+  height: 6rem;
+  padding: 1rem 1.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgb(255 255 255 / 0.07);
+  background:
+    radial-gradient(120% 140% at 50% 0%, rgb(255 255 255 / 0.06), transparent 60%),
+    rgb(255 255 255 / 0.025);
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform 600ms var(--logo-ease),
+    border-color 600ms var(--logo-ease),
+    background-color 600ms var(--logo-ease),
+    box-shadow 600ms var(--logo-ease),
+    opacity 500ms ease;
 }
 
-.company-logo-item-devwk {
-  width: 12rem;
-  height: 3.75rem;
+/* brilho que acende atrás do logo no hover */
+.company-logo-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(60% 70% at 50% 55%, rgb(255 255 255 / 0.14), transparent 70%);
+  opacity: 0;
+  transition: opacity 600ms var(--logo-ease);
+}
+
+/* faixa de luz que atravessa o cartão no hover */
+.company-logo-item::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgb(255 255 255 / 0.16) 50%,
+    transparent 100%
+  );
+  transform: translateX(0) rotate(12deg);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .company-logo-item img {
   display: block;
   max-width: 100%;
-  max-height: 2.5rem;
+  max-height: 3.25rem;
   object-fit: contain;
-  filter: grayscale(1) saturate(0) brightness(1.25) contrast(1.05);
-  opacity: 0.86;
+  filter: grayscale(1) saturate(0) brightness(1.45) contrast(1.1);
+  opacity: 0.92;
+  transition:
+    filter 600ms var(--logo-ease),
+    opacity 600ms var(--logo-ease),
+    transform 600ms var(--logo-ease);
+}
+
+.company-logo-item img.company-logo-shield {
+  max-height: 4.25rem;
+  filter: grayscale(1) saturate(0) brightness(2) contrast(1.15);
 }
 
 .company-logo-item img.company-logo-devwk {
-  max-height: 3.75rem;
-  transform: scale(1.28);
+  max-height: 4.25rem;
+  transform: scale(1.15);
+}
+
+/* ---- hover: cores originais + efeito ---- */
+.company-logo-item:hover {
+  transform: translateY(-6px);
+  border-color: rgb(255 255 255 / 0.22);
+  background-color: rgb(255 255 255 / 0.06);
+  box-shadow:
+    0 18px 40px -12px rgb(0 0 0 / 0.7),
+    0 0 0 1px rgb(255 255 255 / 0.04) inset,
+    0 0 36px -6px rgb(255 255 255 / 0.18);
+}
+
+.company-logo-item:hover::before {
+  opacity: 1;
+}
+
+.company-logo-item:hover::after {
+  opacity: 1;
+  animation: company-logo-shine 900ms var(--logo-ease) forwards;
+}
+
+.company-logo-item:hover img,
+.company-logo-item:hover img.company-logo-shield {
+  filter: none;
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.company-logo-item:hover img.company-logo-devwk {
+  transform: scale(1.24);
+}
+
+/* os outros logos esmaecem para dar foco ao que está em destaque */
+.company-logo-track:hover .company-logo-item:not(:hover) {
+  opacity: 0.45;
+}
+
+@keyframes company-logo-shine {
+  from {
+    transform: translateX(0) rotate(12deg);
+  }
+
+  to {
+    transform: translateX(480%) rotate(12deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .company-logo-track {
+    animation: none;
+  }
+
+  .company-logo-item,
+  .company-logo-item img {
+    transition: none;
+  }
+
+  .company-logo-item:hover::after {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 @keyframes company-logo-scroll {
@@ -160,8 +291,545 @@ body {
   }
 
   to {
-    transform: translateX(calc(-50% - 2rem));
+    transform: translateX(calc(-50% - 1rem));
   }
+}
+
+/* ==========================================================================
+   Recent Work (cards de projeto)
+   ========================================================================== */
+
+.work-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgb(0 0 0 / 0.08);
+  background: #fff;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(17 24 39 / 0.7);
+}
+
+.work-eyebrow-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: #111827;
+  box-shadow: 0 0 0 3px rgb(17 24 39 / 0.12);
+}
+
+.work-all-link {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgb(0 0 0 / 0.1);
+  background: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #111827;
+  transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease;
+}
+
+@media (min-width: 640px) {
+  .work-all-link { align-self: auto; }
+}
+
+.work-all-link:hover {
+  border-color: #111827;
+  background: #111827;
+  color: #fff;
+}
+
+.project-card {
+  --project-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  border: 1px solid rgb(0 0 0 / 0.06);
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+  transition:
+    transform 600ms var(--project-ease),
+    box-shadow 600ms var(--project-ease),
+    border-color 600ms var(--project-ease);
+}
+
+.project-card:hover {
+  transform: translateY(-6px);
+  border-color: rgb(0 0 0 / 0.1);
+  box-shadow: 0 30px 60px -24px rgb(17 24 39 / 0.25), 0 8px 20px -12px rgb(17 24 39 / 0.12);
+}
+
+.project-link {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  border-radius: inherit;
+}
+
+.project-link:focus-visible {
+  outline: 2px solid #111827;
+  outline-offset: 3px;
+}
+
+/* moldura da imagem, com respiro dentro do card */
+.project-media {
+  position: relative;
+  overflow: hidden;
+  margin: 0.5rem 0.5rem 0;
+  border-radius: 1.1rem;
+  background: #11121a;
+  isolation: isolate;
+}
+
+.project-card--featured .project-media {
+  margin-bottom: 0;
+}
+
+@media (min-width: 1024px) {
+  .project-card--featured .project-media {
+    margin: 0.5rem;
+  }
+}
+
+.project-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1100ms var(--project-ease, ease);
+}
+
+.project-card:hover .project-img {
+  transform: scale(1.05);
+}
+
+/* degradê que sobe da base no hover */
+.project-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0) 55%);
+  opacity: 0;
+  transition: opacity 500ms ease;
+  pointer-events: none;
+}
+
+.project-card:hover .project-media::after {
+  opacity: 1;
+}
+
+.project-card--featured .project-media::after {
+  background: linear-gradient(to top, rgb(0 0 0 / 0.35), rgb(0 0 0 / 0) 40%);
+}
+
+/* pílula "View project" */
+.project-cta {
+  position: absolute;
+  z-index: 2;
+  left: 1rem;
+  bottom: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.4375rem 0.875rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.92);
+  backdrop-filter: blur(8px);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #111827;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 450ms var(--project-ease), transform 450ms var(--project-ease);
+}
+
+.project-card:hover .project-cta,
+.project-link:focus-visible .project-cta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.project-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 1.25rem 1.25rem 1.5rem;
+}
+
+.project-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: rgb(107 114 128);
+}
+
+.project-index {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: rgb(17 24 39 / 0.3);
+  font-variant-numeric: tabular-nums;
+}
+
+.project-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: #111827;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.project-arrow {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  border: 1px solid rgb(0 0 0 / 0.1);
+  color: #111827;
+  transition:
+    background-color 400ms var(--project-ease),
+    color 400ms var(--project-ease),
+    border-color 400ms var(--project-ease),
+    transform 400ms var(--project-ease);
+}
+
+.project-card:hover .project-arrow {
+  border-color: #111827;
+  background: #111827;
+  color: #fff;
+  transform: rotate(45deg);
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.project-tags li {
+  padding: 0.1875rem 0.625rem;
+  border-radius: 999px;
+  border: 1px solid rgb(0 0 0 / 0.06);
+  background: rgb(243 244 246);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: rgb(75 85 99);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-card,
+  .project-img,
+  .project-cta,
+  .project-arrow {
+    transition: none;
+  }
+
+  .project-card:hover,
+  .project-card:hover .project-img {
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   Project Crossfade (card Relvia)
+   --------------------------------------------------------------------------
+   Duas imagens empilhadas: a principal aparece primeiro e a segunda entra
+   e sai em fade suave, num ciclo continuo de 12s.
+   ========================================================================== */
+
+.project-crossfade-img.is-next {
+  opacity: 0;
+  animation: project-crossfade 12s ease-in-out infinite;
+}
+
+.project-crossfade-dots {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 0.75rem;
+  display: flex;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.5rem;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.35);
+  backdrop-filter: blur(6px);
+  transform: translateX(-50%);
+}
+
+.project-crossfade-dots span {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.9);
+  animation: project-crossfade-dot-a 12s ease-in-out infinite;
+}
+
+.project-crossfade-dots span + span {
+  animation-name: project-crossfade-dot-b;
+}
+
+/* 0-40%: imagem 1 | 50-90%: imagem 2 | fades de ~1.2s entre elas */
+@keyframes project-crossfade {
+  0%, 40% { opacity: 0; }
+  50%, 90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes project-crossfade-dot-a {
+  0%, 40% { width: 1rem; opacity: 1; }
+  50%, 90% { width: 0.375rem; opacity: 0.45; }
+  100% { width: 1rem; opacity: 1; }
+}
+
+@keyframes project-crossfade-dot-b {
+  0%, 40% { width: 0.375rem; opacity: 0.45; }
+  50%, 90% { width: 1rem; opacity: 1; }
+  100% { width: 0.375rem; opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-crossfade-img.is-next,
+  .project-crossfade-dots span {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   Summary Cards (Skills / Experience / Timeline)
+   --------------------------------------------------------------------------
+   Os tres cartoes escuros abaixo da faixa de logos. Mesmo cabecalho,
+   mesmo espacamento e mesma escala de texto nos tres.
+   ========================================================================== */
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgb(255 255 255 / 0.05), transparent 55%),
+    rgb(255 255 255 / 0.03);
+  transition: border-color 400ms ease, background-color 400ms ease;
+}
+
+.summary-card:hover {
+  border-color: rgb(255 255 255 / 0.16);
+}
+
+.summary-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+}
+
+.summary-card-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.06);
+  color: rgb(255 255 255 / 0.9);
+}
+
+.summary-card-title {
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.summary-card-sub {
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: rgb(255 255 255 / 0.5);
+}
+
+/* ---- Skills ---- */
+.skill-groups {
+  display: grid;
+  gap: 1.125rem;
+}
+
+.skill-group-label {
+  margin-bottom: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.45);
+}
+
+.skill-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.skill-chips li {
+  padding: 0.3125rem 0.625rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.05);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: rgb(255 255 255 / 0.85);
+  white-space: nowrap;
+  transition: background-color 250ms ease, border-color 250ms ease, color 250ms ease;
+}
+
+.skill-chips li:hover {
+  border-color: rgb(255 255 255 / 0.28);
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+}
+
+/* ---- Experience ---- */
+.job-list {
+  display: grid;
+}
+
+.job {
+  padding: 1rem 0;
+  border-top: 1px solid rgb(255 255 255 / 0.06);
+}
+
+.job:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.job:last-child {
+  padding-bottom: 0;
+}
+
+.job-date {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.45);
+  font-variant-numeric: tabular-nums;
+}
+
+.job-role {
+  margin-top: 0.375rem;
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  font-weight: 600;
+  color: #fff;
+}
+
+.job-company {
+  margin-top: 0.125rem;
+  font-size: 0.8125rem;
+  color: rgb(255 255 255 / 0.7);
+}
+
+.job-desc {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: rgb(255 255 255 / 0.55);
+}
+
+/* ---- Timeline ---- */
+.timeline {
+  position: relative;
+  display: grid;
+  gap: 1.5rem;
+  margin-left: 0.3125rem;
+  padding-left: 1.5rem;
+}
+
+/* linha vertical */
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 0.375rem;
+  bottom: 0.375rem;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(rgb(255 255 255 / 0.35), rgb(255 255 255 / 0.06));
+}
+
+.timeline-item {
+  position: relative;
+}
+
+.timeline-dot {
+  position: absolute;
+  top: 0.25rem;
+  left: calc(-1.5rem - 4.5px);
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.45);
+  box-shadow: 0 0 0 4px rgb(10 10 10);
+}
+
+.timeline-item.is-current .timeline-dot {
+  background: #fff;
+  box-shadow: 0 0 0 4px rgb(10 10 10), 0 0 14px rgb(255 255 255 / 0.55);
+}
+
+.timeline-item.is-progress .timeline-dot {
+  background: rgb(10 10 10);
+  border: 1.5px dashed rgb(255 255 255 / 0.7);
+}
+
+.timeline-date {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.45);
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline-title {
+  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  font-weight: 600;
+  color: #fff;
+}
+
+.timeline-meta {
+  margin-top: 0.125rem;
+  font-size: 0.8125rem;
+  color: rgb(255 255 255 / 0.6);
 }
 
 /* ==========================================================================
